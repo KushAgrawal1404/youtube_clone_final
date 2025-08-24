@@ -1,0 +1,140 @@
+.video-manager {
+  margin-top: 16px;
+  padding: 16px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+}
+
+.video-manager__actions {
+  display: flex;
+  gap: 12px;
+}
+
+.video-manager__btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 80px;
+}
+
+.video-manager__btn--edit {
+  background: #007bff;
+  color: white;
+}
+
+.video-manager__btn--edit:hover {
+  background: #0056b3;
+}
+
+.video-manager__btn--delete {
+  background: #dc3545;
+  color: white;
+}
+
+.video-manager__btn--delete:hover {
+  background: #c82333;
+}
+
+.video-manager__btn--cancel {
+  background: #6c757d;
+  color: white;
+}
+
+.video-manager__btn--cancel:hover {
+  background: #545b62;
+}
+
+.video-manager__btn--save {
+  background: #28a745;
+  color: white;
+}
+
+.video-manager__btn--save:hover {
+  background: #1e7e34;
+}
+
+.video-manager__btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.video-manager__edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.video-manager__field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.video-manager__field label {
+  font-weight: 500;
+  color: #333;
+  font-size: 14px;
+}
+
+.video-manager__field input,
+.video-manager__field textarea,
+.video-manager__field select {
+  padding: 10px 12px;
+  border: 2px solid #e1e5e9;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: border-color 0.2s ease;
+  background: white;
+}
+
+.video-manager__field input:focus,
+.video-manager__field textarea:focus,
+.video-manager__field select:focus {
+  outline: none;
+  border-color: #007bff;
+}
+
+.video-manager__field textarea {
+  resize: vertical;
+  min-height: 80px;
+  font-family: inherit;
+}
+
+.video-manager__field select {
+  cursor: pointer;
+}
+
+.video-manager__error {
+  background: #fee;
+  border: 1px solid #fcc;
+  color: #c33;
+  padding: 12px;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.video-manager__edit-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 8px;
+}
+
+@media (max-width: 600px) {
+  .video-manager__actions {
+    flex-direction: column;
+  }
+  
+  .video-manager__edit-actions {
+    flex-direction: column;
+  }
+  
+  .video-manager__btn {
+    width: 100%;
+  }
+}
