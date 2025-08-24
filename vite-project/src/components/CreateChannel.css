@@ -1,0 +1,168 @@
+.create-channel {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  padding: 24px;
+  max-width: 500px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.create-channel__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e1e5e9;
+}
+
+.create-channel__header h2 {
+  margin: 0;
+  color: #1a1a1a;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.create-channel__close {
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: #666;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.create-channel__close:hover {
+  background: #f5f5f5;
+  color: #333;
+}
+
+.create-channel__form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.create-channel__field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.create-channel__field label {
+  font-weight: 500;
+  color: #333;
+  font-size: 14px;
+}
+
+.create-channel__field input,
+.create-channel__field textarea,
+.create-channel__field select {
+  padding: 12px 16px;
+  border: 2px solid #e1e5e9;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: border-color 0.2s ease;
+  background: white;
+  color: #333;
+}
+
+.create-channel__field input:focus,
+.create-channel__field textarea:focus,
+.create-channel__field select:focus {
+  outline: none;
+  border-color: #065fd4;
+}
+
+.create-channel__field input::placeholder,
+.create-channel__field textarea::placeholder {
+  color: #999;
+}
+
+.create-channel__field textarea {
+  resize: vertical;
+  min-height: 100px;
+  font-family: inherit;
+}
+
+.create-channel__field select {
+  cursor: pointer;
+}
+
+.create-channel__error {
+  background: #fee;
+  border: 1px solid #fcc;
+  color: #c33;
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.create-channel__actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 8px;
+}
+
+.create-channel__btn {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 100px;
+}
+
+.create-channel__btn--cancel {
+  background: #f5f5f5;
+  color: #333;
+}
+
+.create-channel__btn--cancel:hover {
+  background: #e5e5e5;
+}
+
+.create-channel__btn--submit {
+  background: #065fd4;
+  color: white;
+}
+
+.create-channel__btn--submit:hover {
+  background: #0356c2;
+}
+
+.create-channel__btn--submit:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.create-channel__btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+@media (max-width: 600px) {
+  .create-channel {
+    margin: 16px;
+    padding: 20px;
+  }
+  
+  .create-channel__actions {
+    flex-direction: column;
+  }
+  
+  .create-channel__btn {
+    width: 100%;
+  }
+}
