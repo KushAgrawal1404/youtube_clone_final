@@ -1,0 +1,26 @@
+.profile-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  color: white;
+  font-weight: bold;
+  text-align: center;
+  user-select: none;
+  box-shadow: none;
+  transition: none;
+  position: relative;
+  background-size: cover;
+  background-position: center;
+  box-sizing: border-box;
+}
+
+/* Removed hover effect to match the ring */
+
+.profile-icon--large {
+  /* No shadow to match the ring */
+}
+
+.profile-icon--small {
+  /* No shadow to match the ring */
+}

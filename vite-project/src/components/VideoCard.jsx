@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import ProfileIcon from './ProfileIcon';
 import './VideoCard.css';
 
 const VideoCard = ({ video }) => {
@@ -32,6 +33,35 @@ const VideoCard = ({ video }) => {
     return `${Math.ceil(diffDays / 365)} years ago`;
   };
 
+  const getRealisticDuration = (video) => {
+    // If video has a real duration, use it
+    if (video.duration && video.duration !== '0:00') {
+      return video.duration;
+    }
+    
+    // Generate realistic duration based on video properties
+    // Use video ID to generate consistent duration for same video
+    let hash = 0;
+    for (let i = 0; i < video._id.toString().length; i++) {
+      const char = video._id.toString().charCodeAt(i);
+      hash = ((hash << 5) - hash + char) >>> 0; // Use >>> 0 to ensure positive
+    }
+    
+    // Generate duration between 2:30 and 15:45 (realistic YouTube video lengths)
+    const baseMinutes = 2 + (hash % 14); // 2-15 minutes
+    const baseSeconds = hash % 60; // 0-59 seconds
+    
+    // Ensure positive values
+    const minutes = Math.abs(baseMinutes);
+    const seconds = Math.abs(baseSeconds);
+    
+    // Format as MM:SS
+    const formattedMinutes = minutes.toString().padStart(2, '0');
+    const formattedSeconds = seconds.toString().padStart(2, '0');
+    
+    return `${formattedMinutes}:${formattedSeconds}`;
+  };
+
   return (
     <div className="video-card" onClick={handleClick}>
       <div className="video-card__thumbnail">
@@ -46,17 +76,16 @@ const VideoCard = ({ video }) => {
           }}
           style={{ opacity: imageLoaded ? 1 : 0.7, transition: 'opacity 0.3s ease' }}
         />
-        <div className="video-card__duration">{video.duration || '0:00'}</div>
+        <div className="video-card__duration">{getRealisticDuration(video)}</div>
       </div>
       
       <div className="video-card__info">
         <div className="video-card__avatar">
-          <img 
-            src={video.uploader?.avatar || 'https://via.placeholder.com/36x36?text=U'} 
-            alt={video.uploader?.username || 'User'}
-            onError={(e) => {
-              e.target.src = 'https://via.placeholder.com/36x36?text=U';
-            }}
+          <ProfileIcon 
+            name={video.channelId?.channelName || 'Unknown Channel'} 
+            size={36}
+            className="profile-icon--small"
+            fillContainer={true}
           />
         </div>
         

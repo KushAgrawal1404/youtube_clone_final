@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import ProfileIcon from './ProfileIcon';
 import './ChannelCard.css';
 
 const ChannelCard = ({ channel }) => {
@@ -23,17 +24,16 @@ const ChannelCard = ({ channel }) => {
       
       <div className="channel-card__content">
         <div className="channel-card__avatar">
-          <img 
-            src={channel.owner?.avatar || 'https://picsum.photos/60/60?random=31'} 
-            alt={channel.owner?.username || 'Channel owner'}
+          <ProfileIcon 
+            name={channel.channelName} 
+            size={60}
+            className="profile-icon--large"
+            fillContainer={true}
           />
         </div>
         
         <div className="channel-card__info">
           <h3 className="channel-card__name">{channel.channelName}</h3>
-          <p className="channel-card__owner">
-            {channel.owner?.username || 'Unknown User'}
-          </p>
           <p className="channel-card__description">
             {channel.description}
           </p>

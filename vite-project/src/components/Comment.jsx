@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import ProfileIcon from './ProfileIcon';
 import axios from 'axios';
 import './Comment.css';
 
@@ -67,11 +68,14 @@ const Comment = ({ comment, onCommentUpdate, onCommentDelete }) => {
   return (
     <div className="comment">
       <div className="comment__header">
-        <img 
-          src={comment.userId?.avatar || 'https://picsum.photos/32/32'} 
-          alt={comment.userId?.username}
-          className="comment__avatar"
-        />
+        <div className="comment__avatar">
+          <ProfileIcon
+            name={comment.userId?.username || 'Unknown User'}
+            size={32}
+            className="profile-icon--small"
+            fillContainer={true}
+          />
+        </div>
         <div className="comment__info">
           <span className="comment__author">
             {comment.userId?.username || 'Unknown User'}
