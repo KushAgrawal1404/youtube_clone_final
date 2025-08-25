@@ -1,0 +1,273 @@
+.channels {
+  min-height: 100vh;
+  background: #f9f9f9;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.channels__header {
+  background: white;
+  border-bottom: 1px solid #e5e5e5;
+  padding: 48px 0;
+  width: 100%;
+}
+
+.channels__container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.channels__header h1 {
+  margin: 0 0 16px 0;
+  font-size: 32px;
+  font-weight: 600;
+  color: #1a1a1a;
+  text-align: center;
+  width: 100%;
+}
+
+.channels__header p {
+  margin: 0 0 24px 0;
+  font-size: 18px;
+  color: #606060;
+  max-width: 600px;
+  text-align: center;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.channels__create-btn {
+  background: #065fd4;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 18px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.channels__create-btn:hover {
+  background: #0356c2;
+  transform: translateY(-1px);
+}
+
+.channels__header-actions {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+.channels__upload-btn {
+  background: #f5f5f5;
+  color: #333;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 18px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.channels__upload-btn:hover {
+  background: #e5e5e5;
+  transform: translateY(-1px);
+}
+
+.channels__content {
+  padding: 48px 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.channels__grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  width: 100%;
+  max-width: 1200px;
+  justify-content: center;
+  margin: 0 auto;
+}
+
+.channels__grid > * {
+  flex: 0 0 350px;
+  max-width: 350px;
+}
+
+.channels__empty {
+  text-align: center;
+  padding: 80px 20px;
+}
+
+.channels__empty h2 {
+  margin: 0 0 16px 0;
+  font-size: 24px;
+  color: #1a1a1a;
+}
+
+.channels__empty p {
+  margin: 0 0 32px 0;
+  font-size: 16px;
+  color: #606060;
+  max-width: 400px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.channels__create-btn--empty {
+  font-size: 18px;
+  padding: 16px 32px;
+}
+
+.channels__loading,
+.channels__error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  text-align: center;
+}
+
+.channels__loading h2,
+.channels__error h2 {
+  margin: 0 0 16px 0;
+  color: #1a1a1a;
+}
+
+.channels__loading p,
+.channels__error p {
+  margin: 0;
+  color: #606060;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #065fd4;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 16px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.channels__modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  overflow-y: auto;
+}
+
+.channels__modal {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 600px;
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
+}
+
+@media (max-width: 768px) {
+  .channels__header {
+    padding: 32px 0;
+  }
+  
+  .channels__header h1 {
+    font-size: 28px;
+  }
+  
+  .channels__header p {
+    font-size: 16px;
+  }
+  
+  .channels__content {
+    padding: 32px 0;
+  }
+  
+  .channels__grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  
+  .channels__container {
+    padding: 0 20px;
+  }
+  
+  .channels__header-actions {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .channels__modal-overlay {
+    padding: 0;
+  }
+  
+  .channels__modal {
+    top: 12px;
+    max-height: calc(100vh - 24px);
+  }
+}
+
+@media (max-width: 600px) {
+  .channels__header {
+    padding: 24px 0;
+  }
+  
+  .channels__header h1 {
+    font-size: 24px;
+  }
+  
+  .channels__header p {
+    font-size: 14px;
+  }
+  
+  .channels__create-btn {
+    padding: 14px 24px;
+  }
+  
+  .channels__content {
+    padding: 24px 0;
+  }
+  
+  .channels__container {
+    padding: 0 16px;
+  }
+  
+  .channels__modal-overlay {
+    padding: 12px;
+  }
+  
+  .channels__modal {
+    margin-top: 16px;
+    max-height: calc(100vh - 32px);
+  }
+}
