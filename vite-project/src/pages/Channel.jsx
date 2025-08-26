@@ -6,6 +6,7 @@ import VideoCard from '../components/VideoCard';
 import VideoManager from '../components/VideoManager';
 import CreateChannel from '../components/CreateChannel';
 import EditVideoModal from '../components/EditVideoModal';
+import ProfileIcon from '../components/ProfileIcon';
 import './Channel.css';
 
 const Channel = () => {
@@ -164,9 +165,11 @@ const Channel = () => {
         
         <div className="channel__info">
           <div className="channel__avatar">
-            <img 
-              src={channel.owner?.avatar || 'https://picsum.photos/80/80?random=41'} 
-              alt={channel.owner?.username || 'Channel owner'}
+            <ProfileIcon 
+              name={channel.channelName} 
+              size={80}
+              className="profile-icon--large"
+              fillContainer={true}
             />
           </div>
           
