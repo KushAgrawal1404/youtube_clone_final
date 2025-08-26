@@ -44,7 +44,7 @@
 }
 
 .channels__create-btn {
-  background: #065fd4;
+  background: #FF0000;
   color: white;
   border: none;
   padding: 12px 24px;
@@ -56,7 +56,7 @@
 }
 
 .channels__create-btn:hover {
-  background: #0356c2;
+  background: #CC0000;
   transform: translateY(-1px);
 }
 

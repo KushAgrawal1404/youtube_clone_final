@@ -77,7 +77,7 @@ const Channels = () => {
       <div className="channels__header">
         <div className="channels__container">
           <h1>My Channels</h1>
-          <p>Manage and view your created channels</p>
+          <p>View and manage your created channels</p>
           
           {user && (
             <div className="channels__header-actions">
