@@ -141,6 +141,15 @@
   gap: 15px;
 }
 
+.video-player__channel-avatar {
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .video-player__channel-info h3 {
   margin: 0 0 5px 0;
   color: #333;

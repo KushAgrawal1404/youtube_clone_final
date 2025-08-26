@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import Comment from '../components/Comment.jsx';
+import ProfileIcon from '../components/ProfileIcon';
 import axios from 'axios';
 import './VideoPlayer.css';
 
@@ -16,6 +17,7 @@ const VideoPlayer = () => {
   const [error, setError] = useState(null);
   const [liked, setLiked] = useState(false);
   const [disliked, setDisliked] = useState(false);
+  const [viewIncremented, setViewIncremented] = useState(false);
 
   const fetchVideo = useCallback(async () => {
     try {
@@ -35,6 +37,22 @@ const VideoPlayer = () => {
     }
   }, [videoId]);
 
+  const incrementView = useCallback(async () => {
+    if (!isAuthenticated || viewIncremented) return;
+    
+    try {
+      await axios.post(`http://localhost:5000/api/videos/${videoId}/view`, {}, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+      });
+      setViewIncremented(true);
+      
+      // Update local view count
+      setVideo(prev => prev ? { ...prev, views: (prev.views || 0) + 1 } : null);
+    } catch (error) {
+      console.error('Failed to increment view:', error);
+    }
+  }, [videoId, isAuthenticated, viewIncremented]);
+
   const fetchComments = useCallback(async () => {
     try {
       const response = await axios.get(`http://localhost:5000/api/comments/video/${videoId}`);
@@ -49,7 +67,12 @@ const VideoPlayer = () => {
     window.scrollTo(0, 0);
     fetchVideo();
     fetchComments();
-  }, [fetchVideo, fetchComments]);
+    
+    // Increment view count once when video loads
+    if (isAuthenticated && !viewIncremented) {
+      incrementView();
+    }
+  }, [fetchVideo, fetchComments, incrementView, isAuthenticated, viewIncremented]);
 
   const handleLike = async () => {
     if (!isAuthenticated) {
@@ -256,6 +279,14 @@ const VideoPlayer = () => {
           </div>
 
           <div className="video-player__channel">
+            <div className="video-player__channel-avatar">
+              <ProfileIcon 
+                name={video.channelId?.channelName || 'Unknown Channel'} 
+                size={48}
+                className="profile-icon--large"
+                fillContainer={true}
+              />
+            </div>
             <div className="video-player__channel-info">
               <h3>{video.channelId?.channelName || 'Unknown Channel'}</h3>
               <p>{video.description}</p>
