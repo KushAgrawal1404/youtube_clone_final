@@ -1,3 +1,10 @@
+/**
+ * Authentication Routes
+ * 
+ * Handles user registration, login, and profile retrieval endpoints.
+ * Includes input validation, JWT token generation, and secure password handling.
+ */
+
 import express from 'express';
 import jwt from 'jsonwebtoken';
 import { body, validationResult } from 'express-validator';
@@ -5,7 +12,14 @@ import User from '../models/User.js';
 
 const router = express.Router();
 
-// Validation middleware
+/**
+ * Input Validation Middleware
+ * 
+ * Uses express-validator to ensure data integrity and security
+ * for user registration and login operations.
+ */
+
+// Validation rules for user registration
 const validateRegistration = [
   body('username')
     .isLength({ min: 3, max: 20 })
@@ -15,12 +29,13 @@ const validateRegistration = [
   body('email')
     .isEmail()
     .withMessage('Please enter a valid email address')
-    .normalizeEmail(),
+    .normalizeEmail(), // Standardizes email format
   body('password')
     .isLength({ min: 6 })
     .withMessage('Password must be at least 6 characters long')
 ];
 
+// Validation rules for user login
 const validateLogin = [
   body('email')
     .isEmail()
@@ -31,15 +46,25 @@ const validateLogin = [
     .withMessage('Password is required')
 ];
 
-// Generate JWT token
+/**
+ * JWT Token Generation Utility
+ * 
+ * Creates a JSON Web Token for authenticated user sessions.
+ * Token expires after 7 days for security.
+ */
 const generateToken = (userId) => {
   return jwt.sign({ userId }, process.env.JWT_SECRET, { expiresIn: '7d' });
 };
 
-// Register user
+/**
+ * POST /api/auth/signup - User Registration
+ * 
+ * Creates a new user account with validated input data.
+ * Checks for existing users to prevent duplicates.
+ */
 router.post('/signup', validateRegistration, async (req, res) => {
   try {
-    // Check for validation errors
+    // Validate input data against defined rules
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ 
@@ -50,7 +75,7 @@ router.post('/signup', validateRegistration, async (req, res) => {
 
     const { username, email, password } = req.body;
 
-    // Check if user already exists
+    // Check for existing users with same email or username
     const existingUser = await User.findOne({ 
       $or: [{ email }, { username }] 
     });
@@ -64,7 +89,7 @@ router.post('/signup', validateRegistration, async (req, res) => {
       }
     }
 
-    // Create new user
+    // Create and save new user (password will be hashed by User model middleware)
     const user = new User({
       username,
       email,
@@ -84,10 +109,14 @@ router.post('/signup', validateRegistration, async (req, res) => {
   }
 });
 
-// Login user
+/**
+ * POST /api/auth/login - User Authentication
+ * 
+ * Authenticates user credentials and returns JWT token for session management.
+ */
 router.post('/login', validateLogin, async (req, res) => {
   try {
-    // Check for validation errors
+    // Validate input data
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ 
@@ -98,22 +127,22 @@ router.post('/login', validateLogin, async (req, res) => {
 
     const { email, password } = req.body;
 
-    // Find user by email
+    // Find user by email address
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(400).json({ message: 'Invalid email or password' });
     }
 
-    // Check password
+    // Verify password using bcrypt comparison
     const isPasswordValid = await user.comparePassword(password);
     if (!isPasswordValid) {
       return res.status(400).json({ message: 'Invalid email or password' });
     }
 
-    // Generate token
+    // Generate JWT token for authenticated session
     const token = generateToken(user._id);
 
-    // Return user data and token
+    // Return success response with token and user data (excluding password)
     res.json({
       message: 'Login successful',
       token,
@@ -132,19 +161,28 @@ router.post('/login', validateLogin, async (req, res) => {
   }
 });
 
-// Get current user
+/**
+ * GET /api/auth/me - Get Current User Profile
+ * 
+ * Retrieves authenticated user's profile information using JWT token.
+ * Populates channel relationships for complete user data.
+ */
 router.get('/me', async (req, res) => {
   try {
+    // Extract JWT token from Authorization header
     const token = req.header('Authorization')?.replace('Bearer ', '');
     
     if (!token) {
-      return res.status(401).json({ message: 'No token provided' });
+      return res.status(401).json({ message: 'No authentication token provided' });
     }
 
+    // Verify and decode JWT token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    
+    // Find user and populate channel relationships
     const user = await User.findById(decoded.userId)
-      .select('-password')
-      .populate('channels');
+      .select('-password') // Exclude password from response
+      .populate('channels'); // Include channel details
 
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
@@ -153,7 +191,7 @@ router.get('/me', async (req, res) => {
     res.json({ user });
   } catch (error) {
     console.error('Get user error:', error);
-    res.status(401).json({ message: 'Invalid token' });
+    res.status(401).json({ message: 'Invalid or expired authentication token' });
   }
 });
 
