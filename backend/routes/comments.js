@@ -1,3 +1,10 @@
+/**
+ * Comment Management Routes
+ * 
+ * Handles CRUD operations for video comments including creation, retrieval,
+ * updates, and deletion with proper authorization checks.
+ */
+
 import express from 'express';
 import { body, validationResult } from 'express-validator';
 import { auth } from '../middleware/auth.js';
@@ -6,7 +13,12 @@ import Video from '../models/Video.js';
 
 const router = express.Router();
 
-// Validation middleware
+/**
+ * Input Validation Middleware
+ * 
+ * Ensures comment text meets length requirements and is properly formatted.
+ * Comments must be between 1 and 500 characters for readability and moderation.
+ */
 const validateComment = [
   body('text')
     .isLength({ min: 1, max: 500 })
@@ -14,10 +26,15 @@ const validateComment = [
     .trim()
 ];
 
-// Add a new comment
+/**
+ * POST /api/comments - Add New Comment
+ * 
+ * Creates a new comment on a video with validation and user authentication.
+ * Automatically generates unique comment ID and associates with video and user.
+ */
 router.post('/', auth, validateComment, async (req, res) => {
   try {
-    // Check for validation errors
+    // Validate input data against defined rules
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ 
@@ -31,13 +48,13 @@ router.post('/', auth, validateComment, async (req, res) => {
 
     console.log('Creating comment with data:', { videoId, text, userId });
 
-    // Check if video exists
+    // Verify video exists before allowing comment
     const video = await Video.findById(videoId);
     if (!video) {
       return res.status(404).json({ message: 'Video not found' });
     }
 
-    // Create new comment
+    // Create new comment instance
     const comment = new Comment({
       videoId,
       userId,
@@ -50,7 +67,7 @@ router.post('/', auth, validateComment, async (req, res) => {
 
     console.log('Comment saved successfully:', comment);
 
-    // Populate comment with user info
+    // Populate comment with user information for response
     await comment.populate('userId', 'username avatar');
 
     res.status(201).json({
@@ -68,21 +85,27 @@ router.post('/', auth, validateComment, async (req, res) => {
   }
 });
 
-// Get comments for a video
+/**
+ * GET /api/comments/video/:videoId - Get Video Comments
+ * 
+ * Retrieves all comments for a specific video with pagination support.
+ * Results are sorted by timestamp (newest comments first).
+ */
 router.get('/video/:videoId', async (req, res) => {
   try {
     const { page = 1, limit = 20 } = req.query;
     const skip = (page - 1) * limit;
 
-    // Check if video exists
+    // Verify video exists before fetching comments
     const video = await Video.findById(req.params.videoId);
     if (!video) {
       return res.status(404).json({ message: 'Video not found' });
     }
 
+    // Execute query with pagination and population
     const comments = await Comment.find({ videoId: req.params.videoId })
-      .populate('userId', 'username avatar')
-      .sort({ timestamp: -1 })
+      .populate('userId', 'username avatar') // Include user details
+      .sort({ timestamp: -1 }) // Newest comments first
       .skip(skip)
       .limit(parseInt(limit));
 
@@ -101,10 +124,15 @@ router.get('/video/:videoId', async (req, res) => {
   }
 });
 
-// Update a comment
+/**
+ * PUT /api/comments/:commentId - Update Comment
+ * 
+ * Updates an existing comment's text content.
+ * Only comment authors can modify their own comments.
+ */
 router.put('/:commentId', auth, validateComment, async (req, res) => {
   try {
-    // Check for validation errors
+    // Validate input data
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ 
@@ -122,16 +150,16 @@ router.put('/:commentId', auth, validateComment, async (req, res) => {
       return res.status(404).json({ message: 'Comment not found' });
     }
 
-    // Check if user owns the comment
+    // Verify user owns the comment before allowing updates
     if (comment.userId.toString() !== userId.toString()) {
       return res.status(403).json({ message: 'Not authorized to update this comment' });
     }
 
-    // Update comment
+    // Update comment with new text
     const updatedComment = await Comment.findByIdAndUpdate(
       req.params.commentId,
       { text },
-      { new: true, runValidators: true }
+      { new: true, runValidators: true } // Return updated document and run validation
     ).populate('userId', 'username avatar');
 
     res.json({
@@ -145,7 +173,12 @@ router.put('/:commentId', auth, validateComment, async (req, res) => {
   }
 });
 
-// Delete a comment
+/**
+ * DELETE /api/comments/:commentId - Delete Comment
+ * 
+ * Permanently removes a comment from the system.
+ * Only comment authors can delete their own comments.
+ */
 router.delete('/:commentId', auth, async (req, res) => {
   try {
     const userId = req.user._id;
@@ -156,12 +189,12 @@ router.delete('/:commentId', auth, async (req, res) => {
       return res.status(404).json({ message: 'Comment not found' });
     }
 
-    // Check if user owns the comment
+    // Verify user owns the comment before allowing deletion
     if (comment.userId.toString() !== userId.toString()) {
       return res.status(403).json({ message: 'Not authorized to delete this comment' });
     }
 
-    // Delete the comment
+    // Delete the comment document
     await Comment.findByIdAndDelete(req.params.commentId);
 
     res.json({ success: true });

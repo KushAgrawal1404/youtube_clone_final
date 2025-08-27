@@ -1,3 +1,10 @@
+/**
+ * Channel Management Routes
+ * 
+ * Handles CRUD operations for YouTube-style channels including creation,
+ * retrieval, updates, and deletion with proper authorization checks.
+ */
+
 import express from 'express';
 import { body, validationResult } from 'express-validator';
 import { auth } from '../middleware/auth.js';
@@ -6,7 +13,12 @@ import User from '../models/User.js';
 
 const router = express.Router();
 
-// Validation middleware
+/**
+ * Input Validation Middleware
+ * 
+ * Validates channel data to ensure data integrity and proper formatting
+ * for channel creation and updates.
+ */
 const validateChannel = [
   body('channelName')
     .isLength({ min: 1, max: 50 })
@@ -21,10 +33,15 @@ const validateChannel = [
     .withMessage('Invalid category')
 ];
 
-// Create a new channel
+/**
+ * POST /api/channels/create - Create New Channel
+ * 
+ * Creates a new channel for the authenticated user with validation.
+ * Prevents duplicate channel names for the same user.
+ */
 router.post('/create', auth, validateChannel, async (req, res) => {
   try {
-    // Check for validation errors
+    // Validate input data against defined rules
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ 
@@ -48,7 +65,7 @@ router.post('/create', auth, validateChannel, async (req, res) => {
       });
     }
 
-    // Create new channel
+    // Create new channel instance
     const channel = new Channel({
       channelName,
       owner,
@@ -59,7 +76,7 @@ router.post('/create', auth, validateChannel, async (req, res) => {
 
     await channel.save();
 
-    // Add channel to user's channels array
+    // Update user's channels array to include new channel
     await User.findByIdAndUpdate(
       owner,
       { $push: { channels: channel._id } }
@@ -76,13 +93,18 @@ router.post('/create', auth, validateChannel, async (req, res) => {
   }
 });
 
-// Get all channels
+/**
+ * GET /api/channels - Get All Channels
+ * 
+ * Retrieves all channels with populated owner and video information.
+ * Results are sorted by creation date (newest first).
+ */
 router.get('/', async (req, res) => {
   try {
     const channels = await Channel.find()
-      .populate('owner', 'username avatar')
-      .populate('videos')
-      .sort({ createdAt: -1 });
+      .populate('owner', 'username avatar') // Include owner details
+      .populate('videos') // Include video information
+      .sort({ createdAt: -1 }); // Newest channels first
 
     res.json({ channels });
   } catch (error) {
@@ -91,15 +113,20 @@ router.get('/', async (req, res) => {
   }
 });
 
-// Get channel by ID
+/**
+ * GET /api/channels/:id - Get Channel by ID
+ * 
+ * Retrieves a specific channel by its unique identifier.
+ * Populates owner and video information for complete channel data.
+ */
 router.get('/:id', async (req, res) => {
   try {
     const channel = await Channel.findById(req.params.id)
-      .populate('owner', 'username avatar')
+      .populate('owner', 'username avatar') // Include owner details
       .populate({
-        path: 'videos',
+        path: 'videos', // Populate video information
         populate: {
-          path: 'uploader',
+          path: 'uploader', // Also populate video uploader details
           select: 'username avatar'
         }
       });
@@ -115,13 +142,18 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// Get user's channels
+/**
+ * GET /api/channels/user/:userId - Get User's Channels
+ * 
+ * Retrieves all channels owned by a specific user.
+ * Useful for displaying user's channel portfolio.
+ */
 router.get('/user/:userId', async (req, res) => {
   try {
     const channels = await Channel.find({ owner: req.params.userId })
       .populate('owner', 'username avatar')
       .populate('videos')
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 }); // Newest channels first
 
     res.json({ channels });
   } catch (error) {
@@ -130,10 +162,15 @@ router.get('/user/:userId', async (req, res) => {
   }
 });
 
-// Update channel
+/**
+ * PUT /api/channels/:id - Update Channel
+ * 
+ * Updates an existing channel's information.
+ * Only channel owners can modify their channels.
+ */
 router.put('/:id', auth, validateChannel, async (req, res) => {
   try {
-    // Check for validation errors
+    // Validate input data
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ 
@@ -148,19 +185,19 @@ router.put('/:id', auth, validateChannel, async (req, res) => {
       return res.status(404).json({ message: 'Channel not found' });
     }
 
-    // Check if user owns the channel
+    // Verify user owns the channel before allowing updates
     if (channel.owner.toString() !== req.user._id.toString()) {
       return res.status(403).json({ message: 'Not authorized to update this channel' });
     }
 
     const { channelName, description, category, channelBanner } = req.body;
 
-    // Check if name is already taken by user's other channels
+    // Check for name conflicts with user's other channels (excluding current channel)
     if (channelName !== channel.channelName) {
       const existingChannel = await Channel.findOne({ 
         owner: req.user._id, 
         channelName,
-        _id: { $ne: req.params.id }
+        _id: { $ne: req.params.id } // Exclude current channel from check
       });
 
       if (existingChannel) {
@@ -170,16 +207,16 @@ router.put('/:id', auth, validateChannel, async (req, res) => {
       }
     }
 
-    // Update channel
+    // Update channel with new data
     const updatedChannel = await Channel.findByIdAndUpdate(
       req.params.id,
       {
         channelName,
         description,
         category,
-        channelBanner: channelBanner || channel.channelBanner
+        channelBanner: channelBanner || channel.channelBanner // Keep existing if not provided
       },
-      { new: true, runValidators: true }
+      { new: true, runValidators: true } // Return updated document and run validation
     ).populate('owner', 'username avatar');
 
     res.json({
@@ -193,7 +230,12 @@ router.put('/:id', auth, validateChannel, async (req, res) => {
   }
 });
 
-// Delete channel
+/**
+ * DELETE /api/channels/:id - Delete Channel
+ * 
+ * Permanently removes a channel and its associated data.
+ * Only channel owners can delete their channels.
+ */
 router.delete('/:id', auth, async (req, res) => {
   try {
     const channel = await Channel.findById(req.params.id);
@@ -202,18 +244,18 @@ router.delete('/:id', auth, async (req, res) => {
       return res.status(404).json({ message: 'Channel not found' });
     }
 
-    // Check if user owns the channel
+    // Verify user owns the channel before allowing deletion
     if (channel.owner.toString() !== req.user._id.toString()) {
       return res.status(403).json({ message: 'Not authorized to delete this channel' });
     }
 
-    // Remove channel from user's channels array
+    // Remove channel reference from user's channels array
     await User.findByIdAndUpdate(
       req.user._id,
       { $pull: { channels: req.params.id } }
     );
 
-    // Delete the channel
+    // Delete the channel document
     await Channel.findByIdAndDelete(req.params.id);
 
     res.json({ message: 'Channel deleted successfully' });

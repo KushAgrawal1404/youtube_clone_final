@@ -1,3 +1,10 @@
+/**
+ * Video Management Routes
+ * 
+ * Handles CRUD operations for video content including upload, retrieval,
+ * updates, deletion, and engagement features like likes/dislikes.
+ */
+
 import express from 'express';
 import { body, validationResult } from 'express-validator';
 import { auth, optionalAuth } from '../middleware/auth.js';
@@ -6,7 +13,14 @@ import Channel from '../models/Channel.js';
 
 const router = express.Router();
 
-// Validation middleware
+/**
+ * Input Validation Middleware
+ * 
+ * Ensures data integrity for video creation and updates.
+ * Separate validation for creation vs updates to allow partial edits.
+ */
+
+// Validation rules for new video creation
 const validateVideo = [
   body('title')
     .isLength({ min: 1, max: 100 })
@@ -27,7 +41,7 @@ const validateVideo = [
     .withMessage('Invalid category')
 ];
 
-// Validation middleware for updates (only validates editable fields)
+// Validation rules for video updates (only editable fields)
 const validateVideoUpdate = [
   body('title')
     .isLength({ min: 1, max: 100 })
@@ -39,10 +53,15 @@ const validateVideoUpdate = [
     .trim()
 ];
 
-// Create a new video
+/**
+ * POST /api/videos - Upload New Video
+ * 
+ * Creates a new video entry with validation and channel ownership verification.
+ * Automatically generates realistic video duration and updates channel relationships.
+ */
 router.post('/', auth, validateVideo, async (req, res) => {
   try {
-    // Check for validation errors
+    // Validate input data against defined rules
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ 
@@ -54,7 +73,7 @@ router.post('/', auth, validateVideo, async (req, res) => {
     const { title, description, videoUrl, thumbnailUrl, channelId, category, tags } = req.body;
     const uploader = req.user._id;
 
-    // Check if channel exists and user owns it
+    // Verify channel exists and user owns it
     const channel = await Channel.findById(channelId);
     if (!channel) {
       return res.status(404).json({ message: 'Channel not found' });
@@ -64,7 +83,12 @@ router.post('/', auth, validateVideo, async (req, res) => {
       return res.status(403).json({ message: 'Not authorized to upload to this channel' });
     }
 
-    // Generate realistic video duration
+    /**
+     * Generate Realistic Video Duration
+     * 
+     * Creates random duration between 2:30 and 15:45 minutes
+     * to simulate realistic YouTube video lengths.
+     */
     const generateDuration = () => {
       // Generate duration between 2:30 and 15:45 (realistic YouTube video lengths)
       const minutes = Math.floor(Math.random() * 14) + 2; // 2-15 minutes
@@ -81,7 +105,7 @@ router.post('/', auth, validateVideo, async (req, res) => {
       return `${formattedMinutes}:${formattedSeconds}`;
     };
 
-    // Create new video
+    // Create new video instance
     const video = new Video({
       title,
       description,
@@ -96,13 +120,13 @@ router.post('/', auth, validateVideo, async (req, res) => {
 
     await video.save();
 
-    // Add video to channel's videos array
+    // Update channel's videos array to include new video
     await Channel.findByIdAndUpdate(
       channelId,
       { $push: { videos: video._id } }
     );
 
-    // Populate video with channel and uploader info
+    // Populate video with related data for response
     await video.populate([
       { path: 'channelId', select: 'channelName' },
       { path: 'uploader', select: 'username avatar' }
@@ -119,7 +143,12 @@ router.post('/', auth, validateVideo, async (req, res) => {
   }
 });
 
-// Get all videos with optional filtering
+/**
+ * GET /api/videos - Get All Videos with Filtering
+ * 
+ * Retrieves videos with optional category filtering, search functionality,
+ * and pagination support. Uses optional authentication for personalized content.
+ */
 router.get('/', optionalAuth, async (req, res) => {
   try {
     const { category, search, page = 1, limit = 12 } = req.query;
@@ -127,20 +156,21 @@ router.get('/', optionalAuth, async (req, res) => {
 
     let query = {};
 
-    // Filter by category
+    // Apply category filter if specified
     if (category && category !== 'All') {
       query.category = category;
     }
 
-    // Search functionality
+    // Apply text search using MongoDB text index
     if (search) {
       query.$text = { $search: search };
     }
 
+    // Execute query with pagination and population
     const videos = await Video.find(query)
       .populate('channelId', 'channelName')
       .populate('uploader', 'username avatar')
-      .sort({ uploadDate: -1 })
+      .sort({ uploadDate: -1 }) // Newest videos first
       .skip(skip)
       .limit(parseInt(limit));
 
@@ -159,7 +189,12 @@ router.get('/', optionalAuth, async (req, res) => {
   }
 });
 
-// Get video by ID
+/**
+ * GET /api/videos/:id - Get Video by ID
+ * 
+ * Retrieves a specific video with full details and user engagement status.
+ * Includes channel and uploader information for complete video context.
+ */
 router.get('/:id', optionalAuth, async (req, res) => {
   try {
     const video = await Video.findById(req.params.id)
@@ -190,7 +225,12 @@ router.get('/:id', optionalAuth, async (req, res) => {
   }
 });
 
-// Increment video views (separate endpoint to prevent duplicate increments)
+/**
+ * POST /api/videos/:id/view - Increment Video Views
+ * 
+ * Increments view count for a video. Only counts views from authenticated users
+ * to prevent artificial inflation from anonymous users.
+ */
 router.post('/:id/view', optionalAuth, async (req, res) => {
   try {
     const video = await Video.findById(req.params.id);
@@ -199,7 +239,7 @@ router.post('/:id/view', optionalAuth, async (req, res) => {
       return res.status(404).json({ message: 'Video not found' });
     }
 
-    // Only increment views if user is authenticated
+    // Only increment views for authenticated users to prevent abuse
     if (req.user) {
       video.views += 1;
       await video.save();
@@ -212,7 +252,12 @@ router.post('/:id/view', optionalAuth, async (req, res) => {
   }
 });
 
-// Get videos by channel
+/**
+ * GET /api/videos/channel/:channelId - Get Videos by Channel
+ * 
+ * Retrieves all videos from a specific channel with pagination support.
+ * Useful for channel pages and video browsing.
+ */
 router.get('/channel/:channelId', async (req, res) => {
   try {
     const { page = 1, limit = 12 } = req.query;
@@ -221,7 +266,7 @@ router.get('/channel/:channelId', async (req, res) => {
     const videos = await Video.find({ channelId: req.params.channelId })
       .populate('channelId', 'channelName')
       .populate('uploader', 'username avatar')
-      .sort({ uploadDate: -1 })
+      .sort({ uploadDate: -1 }) // Newest videos first
       .skip(skip)
       .limit(parseInt(limit));
 
@@ -240,10 +285,16 @@ router.get('/channel/:channelId', async (req, res) => {
   }
 });
 
-// Update video
+/**
+ * PUT /api/videos/:id - Update Video
+ * 
+ * Updates video metadata (title, description, category, tags).
+ * Only video owners can modify their content.
+ * 
+ */
 router.put('/:id', auth, validateVideoUpdate, async (req, res) => {
   try {
-    // Check for validation errors
+    // Validate input data
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ 
@@ -258,14 +309,14 @@ router.put('/:id', auth, validateVideoUpdate, async (req, res) => {
       return res.status(404).json({ message: 'Video not found' });
     }
 
-    // Check if user owns the video
+    // Verify user owns the video before allowing updates
     if (video.uploader.toString() !== req.user._id.toString()) {
       return res.status(403).json({ message: 'Not authorized to update this video' });
     }
 
     const { title, description, category, tags } = req.body;
 
-    // Update video
+    // Update video with new data
     const updatedVideo = await Video.findByIdAndUpdate(
       req.params.id,
       {
@@ -274,7 +325,7 @@ router.put('/:id', auth, validateVideoUpdate, async (req, res) => {
         category,
         tags: tags || []
       },
-      { new: true, runValidators: true }
+      { new: true, runValidators: true } // Return updated document and run validation
     ).populate([
       { path: 'channelId', select: 'channelName' },
       { path: 'uploader', select: 'username avatar' }
@@ -291,7 +342,12 @@ router.put('/:id', auth, validateVideoUpdate, async (req, res) => {
   }
 });
 
-// Delete video
+/**
+ * DELETE /api/videos/:id - Delete Video
+ * 
+ * Permanently removes a video and updates channel relationships.
+ * Only video owners can delete their content.
+ */
 router.delete('/:id', auth, async (req, res) => {
   try {
     const video = await Video.findById(req.params.id);
@@ -300,18 +356,18 @@ router.delete('/:id', auth, async (req, res) => {
       return res.status(404).json({ message: 'Video not found' });
     }
 
-    // Check if user owns the video
+    // Verify user owns the video before allowing deletion
     if (video.uploader.toString() !== req.user._id.toString()) {
       return res.status(403).json({ message: 'Not authorized to delete this video' });
     }
 
-    // Remove video from channel's videos array
+    // Remove video reference from channel's videos array
     await Channel.findByIdAndUpdate(
       video.channelId,
       { $pull: { videos: req.params.id } }
     );
 
-    // Delete the video
+    // Delete the video document
     await Video.findByIdAndDelete(req.params.id);
 
     res.json({ message: 'Video deleted successfully' });
@@ -322,7 +378,12 @@ router.delete('/:id', auth, async (req, res) => {
   }
 });
 
-// Like video with toggle functionality
+/**
+ * POST /api/videos/:id/like - Toggle Video Like
+ * 
+ * Handles video likes with toggle functionality. Users can like/unlike videos,
+ * and likes automatically remove any existing dislikes.
+ */
 router.post('/:id/like', auth, async (req, res) => {
   try {
     console.log('Like request received:', req.params.id, req.body, req.user._id);
@@ -336,7 +397,7 @@ router.post('/:id/like', auth, async (req, res) => {
     const { action } = req.body;
     const userId = req.user._id;
 
-    // Check if user has already liked this video
+    // Check current user engagement status
     const userLikeIndex = video.userLikes.indexOf(userId);
     const userDislikeIndex = video.userDislikes.indexOf(userId);
 
@@ -353,7 +414,7 @@ router.post('/:id/like', auth, async (req, res) => {
         video.likes += 1;
       }
       
-      // Remove dislike if exists
+      // Remove dislike if exists (likes override dislikes)
       if (userDislikeIndex > -1) {
         video.userDislikes.splice(userDislikeIndex, 1);
         video.dislikes = Math.max(0, video.dislikes - 1);
@@ -374,7 +435,12 @@ router.post('/:id/like', auth, async (req, res) => {
   }
 });
 
-// Dislike video with toggle functionality
+/**
+ * POST /api/videos/:id/dislike - Toggle Video Dislike
+ * 
+ * Handles video dislikes with toggle functionality. Users can dislike/undislike videos,
+ * and dislikes automatically remove any existing likes.
+ */
 router.post('/:id/dislike', auth, async (req, res) => {
   try {
     console.log('Dislike request received:', req.params.id, req.body, req.user._id);
@@ -388,7 +454,7 @@ router.post('/:id/dislike', auth, async (req, res) => {
     const { action } = req.body;
     const userId = req.user._id;
 
-    // Check if user has already disliked this video
+    // Check current user engagement status
     const userDislikeIndex = video.userDislikes.indexOf(userId);
     const userLikeIndex = video.userLikes.indexOf(userId);
 
@@ -405,7 +471,7 @@ router.post('/:id/dislike', auth, async (req, res) => {
         video.dislikes += 1;
       }
       
-      // Remove like if exists
+      // Remove like if exists (dislikes override likes)
       if (userLikeIndex > -1) {
         video.userLikes.splice(userLikeIndex, 1);
         video.likes = Math.max(0, video.likes - 1);
@@ -426,10 +492,15 @@ router.post('/:id/dislike', auth, async (req, res) => {
   }
 });
 
-// Get videos by user (for channel management)
+/**
+ * GET /api/videos/user/:userId - Get User's Videos
+ * 
+ * Retrieves all videos uploaded by a specific user.
+ * Restricted to user's own videos for privacy and security.
+ */
 router.get('/user/:userId', auth, async (req, res) => {
   try {
-    // Check if user is requesting their own videos or is admin
+    // Ensure users can only access their own videos
     if (req.params.userId !== req.user._id.toString()) {
       return res.status(403).json({ message: 'Not authorized to view these videos' });
     }
@@ -440,7 +511,7 @@ router.get('/user/:userId', auth, async (req, res) => {
     const videos = await Video.find({ uploader: req.params.userId })
       .populate('channelId', 'channelName')
       .populate('uploader', 'username avatar')
-      .sort({ uploadDate: -1 })
+      .sort({ uploadDate: -1 }) // Newest videos first
       .skip(skip)
       .limit(parseInt(limit));
 
