@@ -1,3 +1,11 @@
+/**
+ * VideoPlayer Page Component
+ * 
+ * Main video playback page featuring video player, metadata display, like/dislike system,
+ * and comments functionality. Handles view tracking, user interactions, and real-time
+ * comment management for authenticated users.
+ */
+
 import { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
@@ -6,25 +14,43 @@ import ProfileIcon from '../components/ProfileIcon';
 import axios from 'axios';
 import './VideoPlayer.css';
 
+/**
+ * VideoPlayer Page Component
+ * 
+ * Comprehensive video viewing experience with integrated social features.
+ * Includes video playback controls, like/dislike functionality, view tracking,
+ * and full comment system with real-time updates. Provides responsive design
+ * and user authentication-based feature access.
+ */
 const VideoPlayer = () => {
-  const { videoId } = useParams();
-  const { isAuthenticated } = useAuth();
+  // Route parameters and authentication
+  const { videoId } = useParams(); // Video ID from URL
+  const { isAuthenticated } = useAuth(); // User authentication status
   
-  const [video, setVideo] = useState(null);
-  const [comments, setComments] = useState([]);
-  const [newComment, setNewComment] = useState('');
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [liked, setLiked] = useState(false);
-  const [disliked, setDisliked] = useState(false);
-  const [viewIncremented, setViewIncremented] = useState(false);
+  // Video and comments data state
+  const [video, setVideo] = useState(null); // Current video data
+  const [comments, setComments] = useState([]); // Video comments array
+  const [newComment, setNewComment] = useState(''); // New comment input value
+  
+  // UI and interaction state
+  const [loading, setLoading] = useState(true); // Loading state for API calls
+  const [error, setError] = useState(null); // Error message display
+  const [liked, setLiked] = useState(false); // User's like status
+  const [disliked, setDisliked] = useState(false); // User's dislike status
+  const [viewIncremented, setViewIncremented] = useState(false); // View count tracking
 
+  /**
+   * Video Data Fetcher
+   * 
+   * Retrieves video information from the API and sets initial like/dislike state.
+   * Updates loading state and handles errors gracefully.
+   */
   const fetchVideo = useCallback(async () => {
     try {
       const response = await axios.get(`http://localhost:5000/api/videos/${videoId}`);
       setVideo(response.data);
       
-      // Set initial like/dislike state from backend
+      // Set initial like/dislike state from backend user status
       if (response.data.userStatus) {
         setLiked(response.data.userStatus.liked);
         setDisliked(response.data.userStatus.disliked);
@@ -37,6 +63,13 @@ const VideoPlayer = () => {
     }
   }, [videoId]);
 
+  /**
+   * View Count Incrementer
+   * 
+   * Increments video view count once per authenticated user session.
+   * Updates local video state to reflect the new view count immediately.
+   * Prevents duplicate view counting on page refreshes.
+   */
   const incrementView = useCallback(async () => {
     if (!isAuthenticated || viewIncremented) return;
     
@@ -46,13 +79,19 @@ const VideoPlayer = () => {
       });
       setViewIncremented(true);
       
-      // Update local view count
+      // Update local view count for immediate UI feedback
       setVideo(prev => prev ? { ...prev, views: (prev.views || 0) + 1 } : null);
     } catch (error) {
       console.error('Failed to increment view:', error);
     }
   }, [videoId, isAuthenticated, viewIncremented]);
 
+  /**
+   * Comments Fetcher
+   * 
+   * Retrieves all comments for the current video from the API.
+   * Handles different response formats gracefully.
+   */
   const fetchComments = useCallback(async () => {
     try {
       const response = await axios.get(`http://localhost:5000/api/comments/video/${videoId}`);
@@ -62,18 +101,32 @@ const VideoPlayer = () => {
     }
   }, [videoId]);
 
+  /**
+   * Initialization Effect
+   * 
+   * Loads video data and comments when component mounts.
+   * Scrolls to top of page and increments view count for authenticated users.
+   * Manages view counting to prevent duplicate increments.
+   */
   useEffect(() => {
     // Scroll to top when video player loads
     window.scrollTo(0, 0);
     fetchVideo();
     fetchComments();
     
-    // Increment view count once when video loads
+    // Increment view count once when video loads for authenticated users
     if (isAuthenticated && !viewIncremented) {
       incrementView();
     }
   }, [fetchVideo, fetchComments, incrementView, isAuthenticated, viewIncremented]);
 
+  /**
+   * Like Action Handler
+   * 
+   * Toggles like status for the video and updates backend accordingly.
+   * Handles like removal and switches from dislike to like.
+   * Updates local video state with new like/dislike counts.
+   */
   const handleLike = async () => {
     if (!isAuthenticated) {
       console.log('User not authenticated');
@@ -81,7 +134,7 @@ const VideoPlayer = () => {
     }
     
     try {
-      // If already liked, remove like. If disliked, remove dislike and add like
+      // Determine action: remove like if already liked, otherwise add like
       const action = liked ? 'remove' : 'like';
       console.log('Like action:', action, 'Current liked state:', liked);
       
@@ -95,18 +148,19 @@ const VideoPlayer = () => {
       console.log('Like response:', response.data);
       
       if (response.data.success) {
+        // Update video with new like/dislike counts from backend
         setVideo(prev => ({
           ...prev,
           likes: response.data.likes,
           dislikes: response.data.dislikes
         }));
         
-        // Update local state based on action
+        // Update local like/dislike state based on action
         if (action === 'remove') {
           setLiked(false);
         } else {
           setLiked(true);
-          setDisliked(false);
+          setDisliked(false); // Remove dislike when adding like
         }
       }
     } catch (err) {
@@ -115,6 +169,13 @@ const VideoPlayer = () => {
     }
   };
 
+  /**
+   * Dislike Action Handler
+   * 
+   * Toggles dislike status for the video and updates backend accordingly.
+   * Handles dislike removal and switches from like to dislike.
+   * Updates local video state with new like/dislike counts.
+   */
   const handleDislike = async () => {
     if (!isAuthenticated) {
       console.log('User not authenticated');
@@ -122,7 +183,7 @@ const VideoPlayer = () => {
     }
     
     try {
-      // If already disliked, remove dislike. If liked, remove like and add dislike
+      // Determine action: remove dislike if already disliked, otherwise add dislike
       const action = disliked ? 'remove' : 'dislike';
       console.log('Dislike action:', action, 'Current disliked state:', disliked);
       
@@ -136,18 +197,19 @@ const VideoPlayer = () => {
       console.log('Dislike response:', response.data);
       
       if (response.data.success) {
+        // Update video with new like/dislike counts from backend
         setVideo(prev => ({
           ...prev,
           likes: response.data.likes,
           dislikes: response.data.dislikes
         }));
         
-        // Update local state based on action
+        // Update local like/dislike state based on action
         if (action === 'remove') {
           setDisliked(false);
         } else {
           setDisliked(true);
-          setLiked(false);
+          setLiked(false); // Remove like when adding dislike
         }
       }
     } catch (err) {
@@ -156,6 +218,13 @@ const VideoPlayer = () => {
     }
   };
 
+  /**
+   * Comment Submission Handler
+   * 
+   * Posts new comment to the video and updates local comments state.
+   * Requires user authentication and non-empty comment text.
+   * Adds new comment to beginning of comments list for immediate display.
+   */
   const handleCommentSubmit = async (e) => {
     e.preventDefault();
     if (!newComment.trim() || !isAuthenticated) return;
@@ -169,14 +238,21 @@ const VideoPlayer = () => {
       });
 
       if (response.data.success) {
+        // Add new comment to beginning of comments list
         setComments(prev => [response.data.comment, ...prev]);
-        setNewComment('');
+        setNewComment(''); // Clear comment input
       }
     } catch (err) {
       console.error('Failed to post comment:', err);
     }
   };
 
+  /**
+   * Comment Update Handler
+   * 
+   * Updates comment text in local state when comment is edited.
+   * Called by Comment component after successful comment updates.
+   */
   const handleCommentUpdate = (commentId, newText) => {
     console.log('Updating comment:', commentId, 'with new text:', newText);
     setComments(prev => {
@@ -190,10 +266,17 @@ const VideoPlayer = () => {
     });
   };
 
+  /**
+   * Comment Delete Handler
+   * 
+   * Removes comment from local state when comment is deleted.
+   * Called by Comment component after successful comment deletion.
+   */
   const handleCommentDelete = (commentId) => {
     setComments(prev => prev.filter(comment => comment._id !== commentId));
   };
 
+  // Loading state display
   if (loading) {
     return (
       <div className="video-player">
@@ -205,6 +288,7 @@ const VideoPlayer = () => {
     );
   }
 
+  // Error state display
   if (error) {
     return (
       <div className="video-player">
@@ -216,6 +300,7 @@ const VideoPlayer = () => {
     );
   }
 
+  // Video not found state
   if (!video) {
     return (
       <div className="video-player">
@@ -230,7 +315,7 @@ const VideoPlayer = () => {
     <div className="video-player">
       <div className="video-player__wrapper">
         <div className="video-player__container">
-        {/* Video Player */}
+        {/* Video Player Section */}
         <div className="video-player__video">
           <video 
             controls 
@@ -243,15 +328,20 @@ const VideoPlayer = () => {
           </video>
         </div>
 
-        {/* Video Information */}
+        {/* Video Information Section */}
         <div className="video-player__info">
+          {/* Video title */}
           <h1 className="video-player__title">{video.title}</h1>
           
+          {/* Video statistics and action buttons */}
           <div className="video-player__stats">
+            {/* View count display */}
             <div className="video-player__views">
               {video.views?.toLocaleString()} views
             </div>
+            {/* Like/dislike action buttons */}
             <div className="video-player__actions">
+              {/* Like button with authentication check */}
               <button 
                 className={`video-player__btn ${liked ? 'video-player__btn--liked' : ''}`}
                 onClick={handleLike}
@@ -264,6 +354,7 @@ const VideoPlayer = () => {
                 {video.likes || 0}
               </button>
               
+              {/* Dislike button with authentication check */}
               <button 
                 className={`video-player__btn ${disliked ? 'video-player__btn--disliked' : ''}`}
                 onClick={handleDislike}
@@ -278,7 +369,9 @@ const VideoPlayer = () => {
             </div>
           </div>
 
+          {/* Channel information display */}
           <div className="video-player__channel">
+            {/* Channel avatar */}
             <div className="video-player__channel-avatar">
               <ProfileIcon 
                 name={video.channelId?.channelName || 'Unknown Channel'} 
@@ -287,6 +380,7 @@ const VideoPlayer = () => {
                 fillContainer={true}
               />
             </div>
+            {/* Channel details */}
             <div className="video-player__channel-info">
               <h3>{video.channelId?.channelName || 'Unknown Channel'}</h3>
               <p>{video.description}</p>
@@ -296,8 +390,10 @@ const VideoPlayer = () => {
 
         {/* Comments Section */}
         <div className="video-player__comments">
+          {/* Comments header with count */}
           <h3>{comments.length} Comments</h3>
           
+          {/* Comment form for authenticated users */}
           {isAuthenticated && (
             <form className="video-player__comment-form" onSubmit={handleCommentSubmit}>
               <textarea
@@ -313,6 +409,7 @@ const VideoPlayer = () => {
             </form>
           )}
 
+          {/* Comments list display */}
           <div className="video-player__comments-list">
             {comments.map(comment => (
               <Comment

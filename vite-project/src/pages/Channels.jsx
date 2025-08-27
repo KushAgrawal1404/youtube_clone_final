@@ -1,3 +1,11 @@
+/**
+ * Channels Page Component
+ * 
+ * Channel management page that displays user's created channels and provides
+ * functionality to create new channels. Features modal-based channel creation
+ * and navigation to video upload functionality.
+ */
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
@@ -6,13 +14,32 @@ import ChannelCard from '../components/ChannelCard';
 import CreateChannel from '../components/CreateChannel';
 import './Channels.css';
 
+/**
+ * Channels Page Component
+ * 
+ * Central hub for channel management allowing users to view, create, and manage
+ * their YouTube-style channels. Integrates with CreateChannel modal component
+ * and provides seamless navigation to video upload functionality.
+ */
 const Channels = () => {
-  const { user } = useAuth();
-  const [channels, setChannels] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [showCreateChannel, setShowCreateChannel] = useState(false);
+  // Authentication context
+  const { user } = useAuth(); // Current authenticated user
+  
+  // Component state management
+  const [channels, setChannels] = useState([]); // Array of user's channels
+  const [loading, setLoading] = useState(true); // Loading state for API calls
+  const [error, setError] = useState(''); // Error message display
+  const [showCreateChannel, setShowCreateChannel] = useState(false); // Modal visibility state
 
+  /**
+   * Channels Fetching Function
+   * 
+   * Retrieves all channels owned by the current user from the API.
+   * Uses useCallback to prevent unnecessary re-renders and API calls.
+   * Handles errors gracefully with user feedback.
+   * 
+   * @returns {Promise<void>}
+   */
   const fetchChannels = useCallback(async () => {
     if (!user) return;
     
@@ -27,16 +54,29 @@ const Channels = () => {
     }
   }, [user]);
 
+  /**
+   * Initialization Effect
+   * 
+   * Fetches user channels when component mounts or user changes.
+   * Sets loading to false after initial fetch attempt.
+   */
   useEffect(() => {
     fetchChannels();
     setLoading(false);
   }, [fetchChannels]);
 
+  /**
+   * Channel Creation Success Handler
+   * 
+   * Adds newly created channel to the channels list and closes the modal.
+   * Called when CreateChannel component successfully creates a new channel.
+   */
   const handleChannelCreated = (newChannel) => {
-    setChannels(prev => [newChannel, ...prev]);
-    setShowCreateChannel(false);
+    setChannels(prev => [newChannel, ...prev]); // Add new channel to beginning of list
+    setShowCreateChannel(false); // Close the creation modal
   };
 
+  // Early return if user is not authenticated
   if (!user) {
     return (
       <div className="channels">
@@ -50,6 +90,7 @@ const Channels = () => {
     );
   }
 
+  // Loading state display
   if (loading) {
     return (
       <div className="channels">
@@ -61,6 +102,7 @@ const Channels = () => {
     );
   }
 
+  // Error state display
   if (error) {
     return (
       <div className="channels">
@@ -74,19 +116,23 @@ const Channels = () => {
 
   return (
     <div className="channels">
+      {/* Page header with title, description, and action buttons */}
       <div className="channels__header">
         <div className="channels__container">
           <h1>My Channels</h1>
           <p>View and manage your created channels</p>
           
+          {/* Action buttons for authenticated users */}
           {user && (
             <div className="channels__header-actions">
+              {/* Create channel button */}
               <button
                 onClick={() => setShowCreateChannel(true)}
                 className="channels__create-btn"
               >
                 Create Channel
               </button>
+              {/* Navigate to video upload page */}
               <Link to="/upload" className="channels__upload-btn">
                 Upload Video
               </Link>
@@ -95,9 +141,12 @@ const Channels = () => {
         </div>
       </div>
 
+      {/* Main content area with channels display */}
       <div className="channels__content">
         <div className="channels__container">
+          {/* Conditional rendering based on channels availability */}
           {channels.length === 0 ? (
+            /* Empty state when no channels exist */
             <div className="channels__empty">
               <h2>No channels yet</h2>
               <p>You haven't created any channels yet. Start by creating your first channel!</p>
@@ -111,6 +160,7 @@ const Channels = () => {
               )}
             </div>
           ) : (
+            /* Channels grid when channels are available */
             <>
               <div className="channels__grid">
                 {channels.map(channel => (
@@ -122,7 +172,7 @@ const Channels = () => {
         </div>
       </div>
 
-      {/* Create Channel Modal */}
+      {/* Create Channel Modal Overlay */}
       {showCreateChannel && (
         <div className="channels__modal-overlay">
           <div className="channels__modal">
