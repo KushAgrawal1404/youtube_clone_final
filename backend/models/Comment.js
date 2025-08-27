@@ -3,10 +3,6 @@
  * 
  * Defines the data structure for user comments on videos in the YouTube Clone application.
  * Includes automatic ID generation and virtual fields for user-friendly display.
- * 
- * @author: Student Developer
- * @version: 1.0.0
- * @date: 2024
  */
 
 import mongoose from 'mongoose';
@@ -60,8 +56,6 @@ const commentSchema = new mongoose.Schema({
  * 
  * Automatically generates a unique comment ID if one isn't provided.
  * Format: comment_[timestamp]_[randomString] for uniqueness and readability.
- * 
- * @param {Function} next - Mongoose middleware function
  */
 commentSchema.pre('save', function(next) {
   if (!this.commentId) {
@@ -76,12 +70,6 @@ commentSchema.pre('save', function(next) {
  * 
  * Calculates and formats the time elapsed since comment was posted.
  * Provides user-friendly time display (e.g., "2 hours ago", "3 days ago").
- * 
- * @returns {string} Human-readable time difference
- * 
- * @example
- * const comment = await Comment.findById('commentId');
- * console.log(comment.age); // "2 hours ago"
  */
 commentSchema.virtual('age').get(function() {
   const now = new Date();

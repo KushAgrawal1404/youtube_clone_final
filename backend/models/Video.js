@@ -3,10 +3,6 @@
  * 
  * Defines the data structure for video content in the YouTube Clone application.
  * Includes metadata, engagement metrics, and relationships to channels and users.
- * 
- * @author: Student Developer
- * @version: 1.0.0
- * @date: 2024
  */
 
 import mongoose from 'mongoose';

@@ -3,10 +3,6 @@
  * 
  * Defines the data structure and behavior for user accounts in the YouTube Clone application.
  * Includes password hashing, validation rules, and authentication methods.
- * 
- * @author: Student Developer
- * @version: 1.0.0
- * @date: 2024
  */
 
 import mongoose from 'mongoose';
@@ -71,8 +67,6 @@ const userSchema = new mongoose.Schema({
  * 
  * Automatically hashes the password before saving to database.
  * Only hashes if password field has been modified to avoid unnecessary re-hashing.
- * 
- * @param {Function} next - Mongoose middleware function
  */
 userSchema.pre('save', async function(next) {
   // Skip hashing if password hasn't changed
@@ -94,13 +88,6 @@ userSchema.pre('save', async function(next) {
  * 
  * Compares a candidate password with the stored hashed password.
  * Used during login authentication.
- * 
- * @param {string} candidatePassword - Plain text password to verify
- * @returns {Promise<boolean>} True if passwords match, false otherwise
- * 
- * @example
- * const user = await User.findOne({ email: 'user@example.com' });
- * const isValid = await user.comparePassword('userPassword123');
  */
 userSchema.methods.comparePassword = async function(candidatePassword) {
   return await bcrypt.compare(candidatePassword, this.password);

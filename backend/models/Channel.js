@@ -3,10 +3,6 @@
  * 
  * Defines the data structure for YouTube-style channels in the application.
  * Each channel belongs to a user and can contain multiple videos.
- * 
- * @author: Student Developer
- * @version: 1.0.0
- * @date: 2024
  */
 
 import mongoose from 'mongoose';

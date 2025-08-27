@@ -3,10 +3,6 @@
  * 
  * This module provides JWT-based authentication middleware for protecting API routes.
  * It includes both required authentication and optional authentication for different use cases.
- * 
- * @author: Student Developer
- * @version: 1.0.0
- * @date: 2024
  */
 
 import jwt from 'jsonwebtoken';
@@ -17,15 +13,6 @@ import User from '../models/User.js';
  * 
  * Verifies JWT token from Authorization header and attaches user data to request object.
  * This middleware is used for routes that require user authentication.
- * 
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
- * @param {Function} next - Express next middleware function
- * @returns {void}
- * 
- * @throws {401} When no token is provided
- * @throws {401} When token is invalid or expired
- * @throws {401} When user no longer exists in database
  */
 export const auth = async (req, res, next) => {
   try {
@@ -68,21 +55,6 @@ export const auth = async (req, res, next) => {
  * 
  * Similar to required auth but doesn't block requests if no token is provided.
  * Useful for routes that can work with or without authentication.
- * 
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
- * @param {Function} next - Express next middleware function
- * @returns {void}
- * 
- * @example
- * // Route that shows different content for authenticated vs anonymous users
- * app.get('/videos', optionalAuth, (req, res) => {
- *   if (req.user) {
- *     // Show personalized content
- *   } else {
- *     // Show public content
- *   }
- * });
  */
 export const optionalAuth = async (req, res, next) => {
   try {
