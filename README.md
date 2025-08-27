@@ -91,14 +91,6 @@ youtube_clone_final/
    cd backend
    npm install
    
-   # Create config.env file with your configuration
-   cp config.env.example config.env
-   
-   # Update config.env with your MongoDB URI and JWT secret
-   MONGODB_URI=mongodb://localhost:27017/youtube_clone
-   JWT_SECRET=your_jwt_secret_key
-   PORT=5000
-   
    # Start development server
    npm run dev
    ```
@@ -120,7 +112,7 @@ youtube_clone_final/
 
 ## 🔧 Configuration
 
-### Environment Variables (Backend)
+### Environment Variables (Backend) 
 
 Create a `config.env` file in the backend directory:
 
@@ -183,20 +175,6 @@ NODE_ENV=development
 - **Authorization**: Role-based access control
 - **CORS Protection**: Secure cross-origin requests
 
-## 🧪 Testing
-
-### Backend Testing
-```bash
-cd backend
-npm test
-```
-
-### Frontend Testing
-```bash
-cd vite-project
-npm test
-```
-
 ## 📱 Responsive Design
 
 The application is built with a mobile-first approach and includes:
@@ -213,45 +191,3 @@ The application is built with a mobile-first approach and includes:
 - **Input Sanitization**: Validation and sanitization of all inputs
 - **CORS Configuration**: Controlled cross-origin access
 - **Environment Variables**: Secure configuration management
-
-## 🚀 Deployment
-
-### Backend Deployment
-1. Set production environment variables
-2. Use PM2 or similar process manager
-3. Configure MongoDB Atlas or production database
-4. Set up reverse proxy (Nginx/Apache)
-
-### Frontend Deployment
-1. Build production bundle: `npm run build`
-2. Deploy to CDN or static hosting
-3. Configure API endpoint URLs
-4. Set up domain and SSL
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add comprehensive tests
-5. Submit a pull request
-
-## 📄 License
-
-This project is created for educational purposes and faculty demonstration.
-
-## 👨‍💻 Author
-
-**Student Developer** - YouTube Clone Project
-- **Version**: 1.0.0
-- **Date**: 2024
-
-## 🙏 Acknowledgments
-
-- YouTube for inspiration
-- React and Node.js communities
-- Modern web development tools and libraries
-
----
-
-**Note**: This project is designed for educational purposes and demonstrates modern full-stack web development practices. It includes comprehensive documentation and professional code structure suitable for academic review.
