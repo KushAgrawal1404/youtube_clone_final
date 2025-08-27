@@ -1,16 +1,40 @@
+/**
+ * EditVideoModal Component
+ * 
+ * Modal component for editing video metadata including title, description, and thumbnail.
+ * Provides form validation, API integration, and thumbnail preview functionality.
+ * Supports real-time thumbnail URL validation and error handling.
+ */
+
 import React, { useState } from 'react';
 import axios from 'axios';
 import './EditVideoModal.css';
 
+/**
+ * EditVideoModal Component
+ * 
+ * Modal dialog that allows users to edit video information such as title,
+ * description, and thumbnail URL. Includes form validation, loading states,
+ * and thumbnail preview with error handling.
+ */
 const EditVideoModal = ({ video, onVideoUpdated, onCancel }) => {
+  // Form data state initialized with current video values
   const [editData, setEditData] = useState({
     title: video.title,
     description: video.description,
     thumbnailUrl: video.thumbnailUrl || ''
   });
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
 
+  // UI state management
+  const [loading, setLoading] = useState(false); // Loading state for API calls
+  const [error, setError] = useState(''); // Error message display
+
+  /**
+   * Form Input Change Handler
+   * 
+   * Updates form state when input values change.
+   * Uses the input's name attribute to dynamically update the correct field.
+   */
   const handleChange = (e) => {
     const { name, value } = e.target;
     setEditData(prev => ({
@@ -19,12 +43,20 @@ const EditVideoModal = ({ video, onVideoUpdated, onCancel }) => {
     }));
   };
 
+  /**
+   * Form Submission Handler
+   * 
+   * Sends API request to update video metadata and handles response.
+   * Updates parent component state on successful update.
+   * Provides error handling and loading state management.
+   */
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError('');
 
     try {
+      // Send PUT request to update video
       const response = await axios.put(`http://localhost:5000/api/videos/${video._id}`, editData, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
@@ -33,6 +65,7 @@ const EditVideoModal = ({ video, onVideoUpdated, onCancel }) => {
         onVideoUpdated(response.data.video);
       }
     } catch (error) {
+      // Display error message from API response or fallback message
       setError(error.response?.data?.message || 'Failed to update video');
     } finally {
       setLoading(false);
@@ -41,9 +74,10 @@ const EditVideoModal = ({ video, onVideoUpdated, onCancel }) => {
 
   return (
     <div className="edit-video-modal">
+      {/* Modal header with title and close button */}
       <div className="edit-video-modal__header">
         <h2>Edit Video</h2>
-        <button 
+        <button
           onClick={onCancel}
           className="edit-video-modal__close"
           type="button"
@@ -52,7 +86,9 @@ const EditVideoModal = ({ video, onVideoUpdated, onCancel }) => {
         </button>
       </div>
 
+      {/* Video editing form */}
       <form onSubmit={handleSubmit} className="edit-video-modal__form">
+        {/* Video title input field */}
         <div className="edit-video-modal__field">
           <label htmlFor="title">Title *</label>
           <input
@@ -67,6 +103,7 @@ const EditVideoModal = ({ video, onVideoUpdated, onCancel }) => {
           />
         </div>
 
+        {/* Video description textarea */}
         <div className="edit-video-modal__field">
           <label htmlFor="description">Description *</label>
           <textarea
@@ -81,6 +118,7 @@ const EditVideoModal = ({ video, onVideoUpdated, onCancel }) => {
           />
         </div>
 
+        {/* Thumbnail URL input with preview */}
         <div className="edit-video-modal__field">
           <label htmlFor="thumbnail">Thumbnail URL</label>
           <input
@@ -91,30 +129,37 @@ const EditVideoModal = ({ video, onVideoUpdated, onCancel }) => {
             onChange={handleChange}
             placeholder="https://example.com/thumbnail.jpg"
           />
+          {/* Thumbnail preview section - only shown when URL is provided */}
           {editData.thumbnailUrl && (
             <div className="edit-video-modal__thumbnail-preview">
-              <img 
-                src={editData.thumbnailUrl} 
-                alt="Thumbnail preview" 
+              {/* Thumbnail image with error handling */}
+              <img
+                src={editData.thumbnailUrl}
+                alt="Thumbnail preview"
                 onError={(e) => {
+                  // Hide broken image and show error message
                   e.target.style.display = 'none';
                   e.target.nextSibling.style.display = 'block';
                 }}
               />
-              <div className="edit-video-modal__thumbnail-error" style={{display: 'none'}}>
+              {/* Error message for invalid thumbnail URLs */}
+              <div className="edit-video-modal__thumbnail-error" style={{ display: 'none' }}>
                 Invalid thumbnail URL
               </div>
             </div>
           )}
         </div>
 
+        {/* Error message display */}
         {error && (
           <div className="edit-video-modal__error">
             <p>{error}</p>
           </div>
         )}
 
+        {/* Form action buttons */}
         <div className="edit-video-modal__actions">
+          {/* Cancel button */}
           <button
             type="button"
             onClick={onCancel}
@@ -123,6 +168,7 @@ const EditVideoModal = ({ video, onVideoUpdated, onCancel }) => {
           >
             Cancel
           </button>
+          {/* Save button with loading state */}
           <button
             type="submit"
             className="edit-video-modal__btn edit-video-modal__btn--save"
