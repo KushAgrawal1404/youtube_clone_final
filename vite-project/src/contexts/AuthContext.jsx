@@ -1,9 +1,22 @@
-/* eslint-disable react-refresh/only-export-components */
+/**
+ * Authentication Context
+ * 
+ * Provides authentication state management throughout the application.
+ * Handles user login, signup, logout, and token management with
+ * automatic axios header configuration and localStorage persistence.
+ */
+
 import { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
 
+// Create authentication context for state sharing
 const AuthContext = createContext();
 
+/**
+ * useAuth Hook
+ * Custom hook to access authentication context values.
+ * Must be used within an AuthProvider component.
+ */
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
@@ -12,12 +25,25 @@ export const useAuth = () => {
   return context;
 };
 
+/**
+ * AuthProvider Component
+ * 
+ * Context provider that manages authentication state and provides
+ * authentication methods to child components. Handles token persistence,
+ * automatic API header configuration, and user session validation.
+ */
 export const AuthProvider = ({ children }) => {
+  // Authentication state management
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(localStorage.getItem('token'));
   const [loading, setLoading] = useState(true);
 
-  // Set up axios defaults
+  /**
+   * Axios Header Configuration Effect
+   * 
+   * Automatically sets or removes Authorization header based on token state.
+   * Ensures all API requests include authentication when user is logged in.
+   */
   useEffect(() => {
     if (token) {
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
@@ -26,16 +52,22 @@ export const AuthProvider = ({ children }) => {
     }
   }, [token]);
 
-  // Check if user is authenticated on mount
+  /**
+   * Authentication Check Effect
+   * 
+   * Validates stored token on component mount by making an API call.
+   * Automatically logs out user if token is invalid or expired.
+   */
   useEffect(() => {
     const checkAuth = async () => {
       if (token) {
         try {
+          // Verify token validity with backend
           const response = await axios.get('http://localhost:5000/api/auth/me');
           setUser(response.data.user);
         } catch (error) {
           console.error('Auth check failed:', error);
-          logout();
+          logout(); // Clear invalid token
         }
       }
       setLoading(false);
@@ -44,6 +76,12 @@ export const AuthProvider = ({ children }) => {
     checkAuth();
   }, [token]);
 
+  /**
+   * User Login Function
+   * 
+   * Authenticates user credentials and stores authentication data.
+   * Updates axios headers and localStorage for persistent sessions.
+   */
   const login = async (email, password) => {
     try {
       const response = await axios.post('http://localhost:5000/api/auth/login', {
@@ -53,6 +91,7 @@ export const AuthProvider = ({ children }) => {
 
       const { token: newToken, user: userData } = response.data;
       
+      // Update state and localStorage
       setToken(newToken);
       setUser(userData);
       localStorage.setItem('token', newToken);
@@ -67,6 +106,12 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  /**
+   * User Registration Function
+   * 
+   * Creates a new user account with provided credentials.
+   * Note: This function only registers the user; login is required separately.
+   */
   const signup = async (username, email, password) => {
     try {
       const response = await axios.post('http://localhost:5000/api/auth/signup', {
@@ -84,6 +129,12 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  /**
+   * User Logout Function
+   * 
+   * Clears all authentication data and resets application state.
+   * Removes token from localStorage and axios headers.
+   */
   const logout = () => {
     setToken(null);
     setUser(null);
@@ -92,14 +143,15 @@ export const AuthProvider = ({ children }) => {
     delete axios.defaults.headers.common['Authorization'];
   };
 
+  // Context value object with all authentication methods and state
   const value = {
-    user,
-    token,
-    loading,
-    login,
-    signup,
-    logout,
-    isAuthenticated: !!token
+    user,           // Current authenticated user data
+    token,          // JWT authentication token
+    loading,        // Loading state during authentication checks
+    login,          // Login function
+    signup,         // Registration function
+    logout,         // Logout function
+    isAuthenticated: !!token  // Boolean indicating authentication status
   };
 
   return (
