@@ -191,3 +191,72 @@ The application is built with a mobile-first approach and includes:
 - **Input Sanitization**: Validation and sanitization of all inputs
 - **CORS Configuration**: Controlled cross-origin access
 - **Environment Variables**: Secure configuration management
+
+## 🎥 Sample Videos for Testing
+
+To help you test the YouTube clone application, here are some working video URLs that you can use directly in the upload form:
+
+### **Free Sample Videos (Public Domain)**
+
+#### 1. **Big Buck Bunny** - Technology/Education
+```
+https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4
+```
+- **Category**: Technology, Education, Entertainment
+- **Duration**: ~10 minutes
+- **Size**: ~27MB
+- **Description**: Open source animated film featuring Big Buck Bunny
+
+#### 2. **Elephant's Dream** - Nature/Travel
+```
+https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4
+```
+- **Category**: Travel, Nature, Entertainment
+- **Duration**: ~11 minutes
+- **Size**: ~31MB
+- **Description**: Open source animated film with nature themes
+
+#### 3. **For Bigger Blazes** - Gaming/Entertainment
+```
+https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4
+```
+- **Category**: Gaming, Entertainment
+- **Duration**: ~15 seconds
+- **Size**: ~2.5MB
+- **Description**: Short demo video for testing
+
+#### 4. **For Bigger Escapes** - Music/Entertainment
+```
+https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4
+```
+- **Category**: Music, Entertainment
+- **Duration**: ~15 seconds
+- **Size**: ~2.5MB
+- **Description**: Short demo video for testing
+
+### **How to Use Sample Videos**
+
+1. **Copy any video URL** from the list above
+2. **Paste it** in the video URL field during upload
+3. **Add metadata**:
+   - Title: Descriptive video title
+   - Description: Video description
+   - Category: Select appropriate category
+   - Tags: Add relevant tags (e.g., "demo", "test", "sample")
+4. **Upload** and test all features
+
+### **Why These URLs Work**
+
+- ✅ **Publicly Accessible**: No authentication required
+- ✅ **MP4 Format**: Compatible with HTML5 video player
+- ✅ **Stable Hosting**: Google's reliable infrastructure
+- ✅ **Free to Use**: Open source content
+- ✅ **Various Sizes**: Different file sizes for testing
+
+### **Testing Different Scenarios**
+
+- **Large Videos**: Use BigBuckBunny.mp4 (27MB) to test loading times
+- **Short Videos**: Use ForBiggerBlazes.mp4 (15 seconds) for quick testing
+- **Category Filtering**: Test all category filters with different videos
+- **Search Functionality**: Test search with video titles and descriptions
+- **Video Player**: Test playback, likes, dislikes, and comments
