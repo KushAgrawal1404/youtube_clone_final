@@ -13,7 +13,17 @@
   gap: 12px;
   margin-bottom: 24px;
   overflow-x: auto;
+  overflow-y: hidden;
   padding-bottom: 8px;
+  width: 100%;
+  max-width: 100%;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+.home__filters::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
 }
 
 .filter-btn {
@@ -27,6 +37,11 @@
   cursor: pointer;
   white-space: nowrap;
   transition: all 0.2s;
+  flex-shrink: 0;
+  min-height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .filter-btn:hover {
@@ -122,11 +137,16 @@
   .home__filters {
     gap: 8px;
     margin-bottom: 20px;
+    padding: 0 4px 8px 4px;
+    margin-left: -4px;
+    margin-right: -4px;
+    width: calc(100% + 8px);
   }
   
   .filter-btn {
     padding: 6px 12px;
     font-size: 13px;
+    flex-shrink: 0;
   }
   
   .home__videos {
@@ -143,11 +163,16 @@
   .home__filters {
     gap: 6px;
     margin-bottom: 16px;
+    padding: 0 2px 8px 2px;
+    margin-left: -2px;
+    margin-right: -2px;
+    width: calc(100% + 4px);
   }
   
   .filter-btn {
     padding: 5px 10px;
     font-size: 12px;
+    flex-shrink: 0;
   }
   
   .home__videos {

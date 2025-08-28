@@ -10,6 +10,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import VideoCard from '../components/VideoCard';
+import config from '../config.js';
 import './Home.css';
 
 /**
@@ -50,7 +51,7 @@ const Home = () => {
   const fetchVideos = useCallback(async () => {
     try {
       setLoading(true);
-      let url = 'http://localhost:5000/api/videos';
+      let url = `${config.API_BASE_URL}${config.API_ENDPOINTS.VIDEOS.BASE}`;
       const params = new URLSearchParams();
       
       // Add category filter if not 'All'
