@@ -8,6 +8,7 @@
 
 import { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
+import config from '../config.js';
 
 // Create authentication context for state sharing
 const AuthContext = createContext();
@@ -63,7 +64,7 @@ export const AuthProvider = ({ children }) => {
       if (token) {
         try {
           // Verify token validity with backend
-          const response = await axios.get('http://localhost:5000/api/auth/me');
+          const response = await axios.get(`${config.API_BASE_URL}${config.API_ENDPOINTS.AUTH.ME}`);
           setUser(response.data.user);
         } catch (error) {
           console.error('Auth check failed:', error);
@@ -84,7 +85,7 @@ export const AuthProvider = ({ children }) => {
    */
   const login = async (email, password) => {
     try {
-      const response = await axios.post('http://localhost:5000/api/auth/login', {
+      const response = await axios.post(`${config.API_BASE_URL}${config.API_ENDPOINTS.AUTH.LOGIN}`, {
         email,
         password
       });
@@ -114,7 +115,7 @@ export const AuthProvider = ({ children }) => {
    */
   const signup = async (username, email, password) => {
     try {
-      const response = await axios.post('http://localhost:5000/api/auth/signup', {
+      const response = await axios.post(`${config.API_BASE_URL}${config.API_ENDPOINTS.AUTH.SIGNUP}`, {
         username,
         email,
         password

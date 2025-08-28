@@ -9,6 +9,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import axios from 'axios';
+import config from '../config.js';
 import './CreateChannel.css';
 
 /**
@@ -93,7 +94,7 @@ const CreateChannel = ({ onChannelCreated, onChannelUpdated, onCancel, editMode 
 
       if (editMode) {
         // Update existing channel via PUT request
-        response = await axios.put(`http://localhost:5000/api/channels/${channelToEdit._id}`, formData, {
+        response = await axios.put(`${config.API_BASE_URL}${config.API_ENDPOINTS.CHANNELS.BASE}/${channelToEdit._id}`, formData, {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
         });
 
@@ -102,7 +103,7 @@ const CreateChannel = ({ onChannelCreated, onChannelUpdated, onCancel, editMode 
         }
       } else {
         // Create new channel via POST request
-        response = await axios.post('http://localhost:5000/api/channels/create', formData, {
+        response = await axios.post(`${config.API_BASE_URL}${config.API_ENDPOINTS.CHANNELS.CREATE}`, formData, {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
         });
 

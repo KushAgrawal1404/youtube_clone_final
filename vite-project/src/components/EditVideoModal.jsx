@@ -8,6 +8,7 @@
 
 import React, { useState } from 'react';
 import axios from 'axios';
+import config from '../config.js';
 import './EditVideoModal.css';
 
 /**
@@ -57,7 +58,7 @@ const EditVideoModal = ({ video, onVideoUpdated, onCancel }) => {
 
     try {
       // Send PUT request to update video
-      const response = await axios.put(`http://localhost:5000/api/videos/${video._id}`, editData, {
+      const response = await axios.put(`${config.API_BASE_URL}${config.API_ENDPOINTS.VIDEOS.BASE}/${video._id}`, editData, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
 

@@ -9,6 +9,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import axios from 'axios';
+import config from '../config.js';
 import './VideoManager.css';
 
 /**
@@ -74,7 +75,7 @@ const VideoManager = ({ video, onVideoUpdate, onVideoDelete }) => {
 
     try {
       // Send PUT request with processed data (tags converted back to array)
-      const response = await axios.put(`http://localhost:5000/api/videos/${video._id}`, {
+      const response = await axios.put(`${config.API_BASE_URL}${config.API_ENDPOINTS.VIDEOS.BASE}/${video._id}`, {
         ...editData,
         tags: editData.tags.split(',').map(tag => tag.trim()).filter(tag => tag)
       }, {
@@ -109,7 +110,7 @@ const VideoManager = ({ video, onVideoUpdate, onVideoDelete }) => {
     setError('');
 
     try {
-      const response = await axios.delete(`http://localhost:5000/api/videos/${video._id}`, {
+      const response = await axios.delete(`${config.API_BASE_URL}${config.API_ENDPOINTS.VIDEOS.BASE}/${video._id}`, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
 

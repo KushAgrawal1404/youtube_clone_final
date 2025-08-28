@@ -6,12 +6,13 @@
  * comment management for authenticated users.
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import Comment from '../components/Comment.jsx';
 import ProfileIcon from '../components/ProfileIcon';
 import axios from 'axios';
+import config from '../config.js';
 import './VideoPlayer.css';
 
 /**
@@ -34,7 +35,6 @@ const VideoPlayer = () => {
   
   // UI and interaction state
   const [loading, setLoading] = useState(true); // Loading state for API calls
-  const [error, setError] = useState(null); // Error message display
   const [liked, setLiked] = useState(false); // User's like status
   const [disliked, setDisliked] = useState(false); // User's dislike status
   const [viewIncremented, setViewIncremented] = useState(false); // View count tracking
@@ -45,9 +45,9 @@ const VideoPlayer = () => {
    * Retrieves video information from the API and sets initial like/dislike state.
    * Updates loading state and handles errors gracefully.
    */
-  const fetchVideo = useCallback(async () => {
+  const fetchVideo = async () => {
     try {
-      const response = await axios.get(`http://localhost:5000/api/videos/${videoId}`);
+      const response = await axios.get(`${config.API_BASE_URL}${config.API_ENDPOINTS.VIDEOS.BASE}/${videoId}`);
       setVideo(response.data);
       
       // Set initial like/dislike state from backend user status
@@ -58,10 +58,9 @@ const VideoPlayer = () => {
       
       setLoading(false);
     } catch {
-      setError('Failed to load video');
       setLoading(false);
     }
-  }, [videoId]);
+  };
 
   /**
    * View Count Incrementer
@@ -70,11 +69,11 @@ const VideoPlayer = () => {
    * Updates local video state to reflect the new view count immediately.
    * Prevents duplicate view counting on page refreshes.
    */
-  const incrementView = useCallback(async () => {
+  const incrementView = async () => {
     if (!isAuthenticated || viewIncremented) return;
     
     try {
-      await axios.post(`http://localhost:5000/api/videos/${videoId}/view`, {}, {
+      await axios.post(`${config.API_BASE_URL}${config.API_ENDPOINTS.VIDEOS.VIEW(videoId)}`, {}, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       setViewIncremented(true);
@@ -84,7 +83,7 @@ const VideoPlayer = () => {
     } catch (error) {
       console.error('Failed to increment view:', error);
     }
-  }, [videoId, isAuthenticated, viewIncremented]);
+  };
 
   /**
    * Comments Fetcher
@@ -92,14 +91,14 @@ const VideoPlayer = () => {
    * Retrieves all comments for the current video from the API.
    * Handles different response formats gracefully.
    */
-  const fetchComments = useCallback(async () => {
+  const fetchComments = async () => {
     try {
-      const response = await axios.get(`http://localhost:5000/api/comments/video/${videoId}`);
+      const response = await axios.get(`${config.API_BASE_URL}${config.API_ENDPOINTS.COMMENTS.VIDEO(videoId)}`);
       setComments(response.data.comments || response.data);
     } catch {
       console.error('Failed to load comments');
     }
-  }, [videoId]);
+  };
 
   /**
    * Initialization Effect
@@ -118,7 +117,7 @@ const VideoPlayer = () => {
     if (isAuthenticated && !viewIncremented) {
       incrementView();
     }
-  }, [fetchVideo, fetchComments, incrementView, isAuthenticated, viewIncremented]);
+  }, [isAuthenticated, viewIncremented]);
 
   /**
    * Like Action Handler
@@ -129,23 +128,18 @@ const VideoPlayer = () => {
    */
   const handleLike = async () => {
     if (!isAuthenticated) {
-      console.log('User not authenticated');
       return;
     }
     
     try {
       // Determine action: remove like if already liked, otherwise add like
       const action = liked ? 'remove' : 'like';
-      console.log('Like action:', action, 'Current liked state:', liked);
       
       const token = localStorage.getItem('token');
-      console.log('Token:', token ? 'Present' : 'Missing');
       
-      const response = await axios.post(`http://localhost:5000/api/videos/${videoId}/like`, { action }, {
+      const response = await axios.post(`${config.API_BASE_URL}${config.API_ENDPOINTS.VIDEOS.LIKE(videoId)}`, { action }, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      
-      console.log('Like response:', response.data);
       
       if (response.data.success) {
         // Update video with new like/dislike counts from backend
@@ -165,7 +159,6 @@ const VideoPlayer = () => {
       }
     } catch (err) {
       console.error('Failed to like video:', err);
-      console.error('Error details:', err.response?.data);
     }
   };
 
@@ -178,23 +171,18 @@ const VideoPlayer = () => {
    */
   const handleDislike = async () => {
     if (!isAuthenticated) {
-      console.log('User not authenticated');
       return;
     }
     
     try {
       // Determine action: remove dislike if already disliked, otherwise add dislike
       const action = disliked ? 'remove' : 'dislike';
-      console.log('Dislike action:', action, 'Current disliked state:', disliked);
       
       const token = localStorage.getItem('token');
-      console.log('Token:', token ? 'Present' : 'Missing');
       
-      const response = await axios.post(`http://localhost:5000/api/videos/${videoId}/dislike`, { action }, {
+      const response = await axios.post(`${config.API_BASE_URL}${config.API_ENDPOINTS.VIDEOS.DISLIKE(videoId)}`, { action }, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      
-      console.log('Dislike response:', response.data);
       
       if (response.data.success) {
         // Update video with new like/dislike counts from backend
@@ -214,7 +202,6 @@ const VideoPlayer = () => {
       }
     } catch (err) {
       console.error('Failed to dislike video:', err);
-      console.error('Error details:', err.response?.data);
     }
   };
 
@@ -230,7 +217,7 @@ const VideoPlayer = () => {
     if (!newComment.trim() || !isAuthenticated) return;
 
     try {
-      const response = await axios.post(`http://localhost:5000/api/comments`, {
+      const response = await axios.post(`${config.API_BASE_URL}${config.API_ENDPOINTS.COMMENTS.BASE}`, {
         videoId,
         text: newComment
       }, {
@@ -254,14 +241,12 @@ const VideoPlayer = () => {
    * Called by Comment component after successful comment updates.
    */
   const handleCommentUpdate = (commentId, newText) => {
-    console.log('Updating comment:', commentId, 'with new text:', newText);
     setComments(prev => {
       const updated = prev.map(comment => 
         comment._id === commentId 
           ? { ...comment, text: newText }
           : comment
       );
-      console.log('Updated comments:', updated);
       return updated;
     });
   };
@@ -288,17 +273,7 @@ const VideoPlayer = () => {
     );
   }
 
-  // Error state display
-  if (error) {
-    return (
-      <div className="video-player">
-        <div className="video-player__error">
-          <h2>Error</h2>
-          <p>{error}</p>
-        </div>
-      </div>
-    );
-  }
+
 
   // Video not found state
   if (!video) {

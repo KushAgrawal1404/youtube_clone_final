@@ -10,6 +10,7 @@ import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import ProfileIcon from './ProfileIcon';
 import axios from 'axios';
+import config from '../config.js';
 import './Comment.css';
 
 /**
@@ -58,13 +59,11 @@ const Comment = ({ comment, onCommentUpdate, onCommentDelete }) => {
 
     try {
       // Send PUT request to update comment
-      const response = await axios.put(`http://localhost:5000/api/comments/${comment._id}`, {
+      const response = await axios.put(`${config.API_BASE_URL}${config.API_ENDPOINTS.COMMENTS.BASE}/${comment._id}`, {
         text: editText
       }, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
-
-      console.log('Edit response:', response.data);
 
       if (response.data.message === 'Comment updated successfully') {
         // Update the comment in the parent component
@@ -73,9 +72,6 @@ const Comment = ({ comment, onCommentUpdate, onCommentDelete }) => {
         setCurrentText(editText);
         // Close the edit form
         setIsEditing(false);
-        console.log('Comment updated successfully, form closed');
-      } else {
-        console.log('Unexpected response format:', response.data);
       }
     } catch (error) {
       console.error('Failed to edit comment:', error);
@@ -90,7 +86,7 @@ const Comment = ({ comment, onCommentUpdate, onCommentDelete }) => {
    */
   const handleDelete = async () => {
     try {
-      const response = await axios.delete(`http://localhost:5000/api/comments/${comment._id}`, {
+      const response = await axios.delete(`${config.API_BASE_URL}${config.API_ENDPOINTS.COMMENTS.BASE}/${comment._id}`, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
 
