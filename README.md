@@ -1,3 +1,6 @@
+# GitHub Link: https://github.com/KushAgrawal1404/youtube_clone_final
+# Video Link: https://drive.google.com/file/d/1OEimmWQ09KRZ9xtzisZ9k9a-sBlNO2tR/view?usp=sharing
+
 # YouTube Clone - Full Stack Application
 
 A comprehensive YouTube clone application built with modern web technologies, featuring user authentication, video management, channel creation, and social features like comments and likes.
@@ -260,3 +263,7 @@ https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscap
 - **Category Filtering**: Test all category filters with different videos
 - **Search Functionality**: Test search with video titles and descriptions
 - **Video Player**: Test playback, likes, dislikes, and comments
+
+
+# GitHub Link: https://github.com/KushAgrawal1404/youtube_clone_final
+# Video Link: https://drive.google.com/file/d/1OEimmWQ09KRZ9xtzisZ9k9a-sBlNO2tR/view?usp=sharing
